@@ -98,11 +98,16 @@ public class LoginActivity extends AppCompatActivity{
     //  Then register a NEW account whose password is all lowercase letters + digits (e.g. "abc12345")
     //  and log in with it. Does it work? Now try a new account with a capital letter in the password.
     //  Your tasks:
-    //    a) Write down the pattern you observe (which passwords work and which don't?).
+    //    a) Write down the pattern you observe (which passwords work and which don't?)
+    //       The demo account doesn't work, and creating an account works but there are logical error present
+    //       within the application. For example the original password will work "abc12345" and typing an all caps password "ABC12345"
+    //       will work too.
     //    b) Set a breakpoint on the authManager.login(...) line below, run in Debug mode, and use
     //       "Step Into" (F7) to follow the password all the way to where it is checked.
     //       Watch the value of the password variable at each step in the Variables panel.
     //    c) Identify the exact line that breaks it, fix it, and explain WHY it broke.
+    //       Line 29 in AuthManager.java: password.toLowerCase(Locale.ROOT) was passed to PasswordHasher.verify.
+    //       This lowered the case of the password before hashing during login, causing a mismatch with the hash saved at registration.
     //
     // TODO(DEBUG #2): Users with capital letters in their email can't log in after registering.
     //  Steps to reproduce (fix DEBUG #1 first so logins can succeed at all):
@@ -113,11 +118,17 @@ public class LoginActivity extends AppCompatActivity{
     //       It should say the account already exists, but it is accepted.
     //  Your tasks:
     //    a) Compare with the same steps using an all-lowercase email. What's different?
+    //       With all lowercase emails typed, it still login the account with lowercase letters which fail the hashmap lookups
     //    b) Use breakpoints (or Log.d(...) + Logcat) to inspect how an email is SAVED versus how
     //       it is LOOKED UP. Print the exact strings being compared.
+    //       Saved string (normalized): "juan.delacruz@mail.com"
+    //       Lookup string (normalized): "juan.delacruz@mail.com"
+    //       Comparison: "juan.delacruz@mail.com".equals("juan.delacruz@mail.com") -> true.
     //    c) Hint for investigation only: a HashMap compares keys with equals(), and "A".equals("a") is false.
     //    d) Fix it so email matching is case-insensitive everywhere, and add a unit test in
     //       AuthManagerTest that would have caught this bug.
+    //       LOGIN case insensitive is implemented. Logging in regardless how you capitalize the email lowercase or uppercase
+    //       the input email is normalize to lowercase prior to its lookup.
     private void attemptLogin() {
         clearErrors();
 

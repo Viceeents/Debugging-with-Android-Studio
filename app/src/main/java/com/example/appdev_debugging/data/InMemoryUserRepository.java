@@ -26,7 +26,7 @@ public class InMemoryUserRepository implements UserRepository {
         if (exists(user.getEmail())) {
             return false;
         }
-        usersByEmail.put(user.getEmail(), user);
+        usersByEmail.put(normalize(user.getEmail()), user);
         return true;
     }
 

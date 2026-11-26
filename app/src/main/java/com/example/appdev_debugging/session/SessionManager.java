@@ -27,14 +27,17 @@ public class SessionManager {
     /** @return the logged-in email, or null if nobody is logged in. */
     public String getLoggedInEmail() {
         if (currentEmail != null) return currentEmail;
-        return prefs.getString(KEY_EMAIL, null);
+        currentEmail = prefs.getString(KEY_EMAIL, null);
+        return currentEmail;
     }
 
+    @SuppressWarnings("unused")
     public boolean isLoggedIn() {
         return getLoggedInEmail() != null;
     }
 
     public void logout() {
         currentEmail = null;
+        prefs.edit().remove(KEY_EMAIL).apply();
     }
 }

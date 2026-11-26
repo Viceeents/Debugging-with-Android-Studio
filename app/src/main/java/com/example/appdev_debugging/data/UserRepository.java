@@ -2,9 +2,9 @@ package com.example.appdev_debugging.data;
 
 import com.example.appdev_debugging.data.model.User;
 
-public class UserRepository {
+public interface UserRepository {
     /** @return the user with this email, or null if none exists. Email lookup is case-insensitive. */
-    User findByEmail(String email);
+   User findByEmail(String email);
 
     /** @return true if a user with this email already exists. */
     boolean exists(String email);

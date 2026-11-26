@@ -26,7 +26,7 @@ public class AuthManager {
         if (passwordError != null) return AuthResult.failure(AuthResult.Field.PASSWORD, passwordError);
 
         User user = repository.findByEmail(email);
-        if (user == null || !PasswordHasher.verify(password.toLowerCase(Locale.ROOT), user.getSalt(), user.getPasswordHash())) {
+        if (user == null || !PasswordHasher.verify(password, user.getSalt(), user.getPasswordHash())) {
             return AuthResult.failure(AuthResult.Field.GENERAL, INVALID_CREDENTIALS);
         }
         return AuthResult.success(user);
@@ -52,7 +52,7 @@ public class AuthManager {
 
         String salt = PasswordHasher.generateSalt();
         String hash = PasswordHasher.hash(password, salt);
-        User user = new User(fullName.trim(), email.trim(), hash, salt);
+        User user = new User(fullName.trim(), normalizeEmail(email), hash, salt);
 
         if (!repository.add(user)) {
             // Race condition safety net: someone registered the same email in between.
@@ -64,6 +64,10 @@ public class AuthManager {
     /** @return the user for an email (used to validate a restored session), or null. */
     public User getUser(String email) {
         return repository.findByEmail(email);
+    }
+
+    private static String normalizeEmail(String email) {
+        return email == null ? "" : email.trim().toLowerCase(Locale.ROOT);
     }
 }
 

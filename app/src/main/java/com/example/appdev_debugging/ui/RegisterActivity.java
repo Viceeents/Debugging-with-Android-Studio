@@ -61,14 +61,19 @@ public class RegisterActivity extends AppCompatActivity{
 
     // TODO(DEBUG #3): Valid Philippine school / government emails are rejected.
     //  Steps to reproduce:
-    //    1. Register with email "juan@school.ph"  ->  "Enter a valid email address".
+    //    1. Register with email "juan@school.ph"  ->  "Enter a valid email address"
     //    2. "juan@school.com" is accepted. "juan@up.edu.ph" is also rejected.
     //  Your tasks:
     //    a) Find where an email is decided to be "valid" (follow authManager.register(...) below).
+    //       Validator.java line 8 in EMAIL_PATTERN regex.
     //    b) Run the existing unit tests: right-click app/src/test/java -> Run 'Tests in ...'.
     //       Read the failing test's name and message. Which test fails, and what does it tell you?
+    //       validateEmail_acceptsTwoLetterTLD fails because 2-letter TLDs (.ph) were rejected by {3,}.
     //    c) Test your guess quickly in an online regex tester or a tiny JUnit test before fixing.
+    //       Tested with ValidatorTest.validateEmail_acceptsTwoLetterTLD().
     //    d) Fix it, re-run the tests until they pass, and explain what part of the rule was wrong.
+    //       Changed EMAIL_PATTERN regex from {3,} to {2,}. The rule originally required at least 3 characters
+    //       for top-level domains, rejecting valid 2-letter ccTLDs like .ph.
     //
     // TODO(DEBUG #4): Weak passwords are being accepted.
     //  The helper text promises "At least 8 characters, with letters and numbers".
@@ -78,9 +83,17 @@ public class RegisterActivity extends AppCompatActivity{
     //    3. Try "abcd1234" -> accepted (correct).
     //  Your tasks:
     //    a) Locate the password strength rule and read the boolean logic carefully.
+    //       The password rule in Validator.java used `if (!hasLetter && !hasDigit)`, which only rejected passwords missing both letters and numbers at the same time.
+    //       Because of the `&&` operator, passwords containing only letters or only numbers were mistakenly accepted.
     //    b) Make a truth table for hasLetter / hasDigit (4 rows). For each row, write what the
     //       rule SHOULD return and what the code ACTUALLY returns.
+    //       | hasLetter | hasDigit | SHOULD return | ACTUALLY returned |
+    //       | false     | false    | Error         | null (BUG) -> Error (Correct) |
+    //       | true      | false    | Error         | null (BUG)        |
+    //       | false     | true     | Error         | null (BUG)        |
+    //       | true      | true     | null          | null (Correct)    |
     //    c) Fix the condition. Confirm with the unit tests (one of them should be failing right now).
+    //       Changed condition to: if (!hasLetter || !hasDigit) return "Password must contain letters and numbers";
     private void attemptRegister() {
         clearErrors();
 

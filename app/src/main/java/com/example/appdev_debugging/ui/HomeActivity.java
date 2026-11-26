@@ -47,12 +47,16 @@ public class HomeActivity extends AppCompatActivity{
         //       You land on Home, still logged in, even though you logged out.
         //  Your tasks:
         //    a) Explain why the bug only appears when "Remember me" was ticked AND the app is restarted.
-        //       (Think: where does the session live in each case: memory or disk?)
+        //       When "Remember me" was ticked, the session was saved to disk (SharedPreferences). Logout cleared the in-memory email variable
+        //       but failed to commit the removal to disk. When the app restarted, memory was reset and SessionManager re-read the saved session from disk.
         //    b) Use Android Studio's Device Explorer to open
         //       /data/data/com.example.simplelogin/shared_prefs/ and inspect the XML file there
         //       before login, after login, and after logout. What do you see?
+        //       Before login: no file/entry. After login (Remember me): <string name="logged_in_email">email</string>.
+        //       After logout (before fix): key remained in XML. After fix: key is removed.
         //    c) Find and fix the root cause. Do NOT fix it by adding extra code here in HomeActivity;
         //       fix the class that is actually responsible for the session.
+        //       Fixed in SessionManager.java: added .apply() to prefs.edit().remove(KEY_EMAIL) inside logout().
         btnLogout.setOnClickListener(v -> {
             sessionManager.logout();
             goToLogin();
